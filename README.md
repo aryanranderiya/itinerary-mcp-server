@@ -1,6 +1,6 @@
-# Travel Itinerary Backend System
+# Travel Itinerary Backend System with MCP
 
-A FastAPI-based backend system for managing travel itineraries, focused on Thailand's Phuket and Krabi regions.
+A FastAPI-based backend system for managing travel itineraries. This project implements the Model Context Protocol (MCP) for enhanced AI assistant integration.
 
 ## Features
 
@@ -8,129 +8,130 @@ A FastAPI-based backend system for managing travel itineraries, focused on Thail
 - **RESTful API**: Endpoints to create and view trip itineraries
 - **Seed Data**: Pre-populated database with realistic data for Phuket and Krabi regions
 - **Recommended Itineraries**: Sample itineraries ranging from 2-8 nights
+- **MCP Integration**: Full Model Context Protocol support for AI assistants
 
-## Tech Stack
+## Installation
 
-- **FastAPI**: High-performance web framework for building APIs
-- **SQLAlchemy**: SQL toolkit and ORM
-- **SQLite**: Lightweight database
-- **Pydantic**: Data validation and settings management
-- **uv**: Fast Python package installer
+1. Ensure you have Python 3.8+ installed
 
-## Project Structure
+2. Install uv (fast Python package installer) from [here](https://docs.astral.sh/uv/getting-started/installation/):
 
-```
-.
-├── app
-│   ├── api
-│   │   └── itinerary.py  # API routes for itineraries
-│   ├── database
-│   │   ├── connection.py  # Database connection setup
-│   │   └── seed.py  # Database seeding logic
-│   ├── models
-│   │   └── models.py  # SQLAlchemy models
-│   └── schemas
-│       └── schemas.py  # Pydantic schemas
-├── main.py  # FastAPI application entry point
-└── README.md
-```
+3. Clone this repository and navigate to the project directory:
 
-## API Endpoints
+   ```bash
+   git clone https://github.com/aryanranderiya/itinerary-mcp-server
+   cd itinerary-mcp-server
+   ```
 
-### Itineraries
+4. Create a virtual environment and install dependencies:
 
-#### Get all itineraries
+   ```bash
+   uv venv
+   uv sync
+   ```
 
-```
-GET /itineraries
-```
+5. Activate the virtual environment:
 
-Query parameters:
+   **On Linux/macOS:**
 
-- `skip` (int, optional): Number of records to skip (default: 0)
-- `limit` (int, optional): Maximum number of records to return (default: 100)
-- `region` (string, optional): Filter by region (e.g., "Phuket", "Krabi", "Phuket-Krabi")
-- `min_nights` (int, optional): Filter by minimum number of nights
-- `max_nights` (int, optional): Filter by maximum number of nights
-- `recommended` (bool, optional): Filter by recommended status
+   ```bash
+   source .venv/bin/activate
+   ```
 
-#### Get a specific itinerary
+   **On Windows (Command Prompt):**
 
-```
-GET /itineraries/{itinerary_id}
-```
+   ```cmd
+   .venv\Scripts\activate.bat
+   ```
 
-Path parameters:
+   **On Windows (PowerShell):**
 
-- `itinerary_id` (int, required): ID of the itinerary to retrieve
-
-#### Create a new itinerary
-
-```
-POST /itineraries
-```
-
-Request body:
-
-```json
-{
-  "name": "Custom Phuket Trip",
-  "description": "A custom 4-night trip to Phuket",
-  "region": "Phuket",
-  "duration_nights": 4,
-  "is_recommended": 0,
-  "days": [
-    {
-      "day_number": 1,
-      "transfer_id": 1,
-      "hotel_id": 1,
-      "activity_ids": [1]
-    },
-    {
-      "day_number": 2,
-      "hotel_id": 1,
-      "activity_ids": [2, 3]
-    },
-    {
-      "day_number": 3,
-      "hotel_id": 2,
-      "activity_ids": [4]
-    },
-    {
-      "day_number": 4,
-      "transfer_id": 2,
-      "hotel_id": 3,
-      "activity_ids": []
-    }
-  ]
-}
-```
+   ```powershell
+   .venv\Scripts\Activate.ps1
+   ```
 
 ## Running the Project
 
-1. Ensure you have Python 3.8+ installed
-2. Install dependencies:
+### Development Mode
+
+Run the server in development mode with auto-reload:
+Only run in development mode if you need to edit the code.
 
 ```bash
-uv pip install -r requirements.txt
+fastapi dev
 ```
 
-3. Run the server:
+### Production Mode
+
+Run the server in production mode:
 
 ```bash
-uvicorn main:app --reload
+fastapi start
 ```
 
-4. Access the API documentation at `http://localhost:8000/docs`
+The API will be available at `http://localhost:8000` and the API documentation at `http://localhost:8000/docs`.
 
-## Database Schema
+## Using the Model Context Protocol (MCP)
 
-The database is structured with the following key entities:
+This project implements the [Model Context Protocol (MCP)](https://github.com/microsoft/model-context-protocol), which enables AI assistants to interact with your API directly. This means AI tools can understand your API's capabilities, data structures, and execute operations on your behalf.
 
-- **Locations**: Geographic locations in Thailand (Phuket, Krabi)
-- **Hotels**: Accommodation options available in different locations
-- **Activities**: Available excursions and experiences in each location
-- **Transfers**: Transportation options between locations
-- **Itineraries**: Complete trip plans combining hotels, activities, and transfers
-- **ItineraryDays**: Individual days within an itinerary
-- **HotelStays**: Hotel bookings for specific days in an itinerary
+### MCP Configuration
+
+The project is already configured with the necessary MCP setup:
+
+- **fastapi_mcp Library**: We use [fastapi_mcp](https://fastapi-mcp.tadata.com/) library to integrate MCP functionality with FastAPI
+- **mcp.json**: The configuration is located in the `.vscode/mcp.json` file, which defines the MCP server settings:
+  ```json
+  {
+    "servers": {
+      "stay-often-mcp1": {
+        "type": "sse",
+        "url": "http://localhost:8000/mcp"
+      }
+    }
+  }
+  ```
+  This configuration connects to the MCP endpoint at `http://localhost:8000/mcp` using Server-Sent Events (SSE).
+
+No additional setup is required to use the MCP functionality - it's built into the server and ready to use.
+
+### Supported MCP Clients
+
+You can use any MCP-compatible client to interact with this API. MCP clients include:
+
+- [GitHub Copilot](https://github.com/features/copilot)
+- [Claude Desktop](https://claude.ai/download)
+- And other MCP-compatible assistants
+
+For more information about MCP, visit the [official MCP documentation](https://modelcontextprotocol.io/).
+
+### Example: Using with GitHub Copilot
+
+Here's how you can interact with this API using GitHub Copilot:
+
+1. Start the server:
+
+   ```bash
+   fastapi dev
+   ```
+
+2. In your conversation with GitHub Copilot, you can request operations like:
+
+   - **Get all itineraries**:
+
+     ```
+     Can you show me all the recommended itineraries for Phuket?
+     ```
+
+   - **Get a specific itinerary**:
+
+     ```
+     Show me the details for itinerary ID 3
+     ```
+
+   - **Create a new itinerary**:
+     ```
+     Create a new 5-night itinerary in Krabi with the following details: Name: "Krabi Adventure", day 1 at hotel 5 with activities 10 and 11, day 2 at hotel 5 with activity 12, etc.
+     ```
+
+GitHub Copilot will understand these requests and execute the appropriate API calls on your behalf through the MCP protocol.
