@@ -135,3 +135,18 @@ Here's how you can interact with this API using GitHub Copilot:
      ```
 
 GitHub Copilot will understand these requests and execute the appropriate API calls on your behalf through the MCP protocol.
+
+## Screenshots
+![Screenshot from 2025-04-30 02-25-34](https://github.com/user-attachments/assets/8eef9a6e-5b78-44e7-b134-c1600c20a4a0) 
+![Screenshot from 2025-04-30 02-27-45](https://github.com/user-attachments/assets/5e876ba6-d73d-45cf-801b-28d6b36ba6ea)
+<!--
+![Screenshot from 2025-04-30 02-26-30](https://github.com/user-attachments/assets/c725cc9b-d6a5-4cb0-b153-c3aa15eee096)
+![Screenshot from 2025-04-30 02-28-28](https://github.com/user-attachments/assets/6c7fdd95-f1b4-4a92-8e38-34a052a2bd0d)
+![Screenshot from 2025-04-30 02-30-59](https://github.com/user-attachments/assets/7eaf3ba2-c8e7-4def-ba32-87c37d54210a)
+-->
+![Screenshot from 2025-04-30 02-49-00](https://github.com/user-attachments/assets/df06713d-c46a-4020-9b0c-72ae4a2d3516)
+![Screenshot from 2025-04-30 02-34-12](https://github.com/user-attachments/assets/32768c07-fcfe-4941-aed8-16cef9b151cb)
+![Screenshot from 2025-04-30 02-34-33](https://github.com/user-attachments/assets/ccc6d14a-9b37-41a1-9c26-23088b2f27e2)
+![Screenshot from 2025-04-30 02-36-44](https://github.com/user-attachments/assets/c75344bb-a624-4c63-a214-efb89c502a11)
+
+
