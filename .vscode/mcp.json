@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "stay-often-mcp1": {
+      "type": "sse",
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}

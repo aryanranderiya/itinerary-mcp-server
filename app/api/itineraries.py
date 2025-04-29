@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-# from app.mcp.server import mcp
 from app.database.connection import get_db
 from app.schemas.schemas import Itinerary as ItinerarySchema
 from app.schemas.schemas import ItineraryCreate, ItineraryDetailed
@@ -17,8 +16,9 @@ router = APIRouter(
 )
 
 
-# @mcp.tool()
-@router.get("/", response_model=List[ItinerarySchema])
+@router.get(
+    "/", response_model=List[ItinerarySchema], operation_id="Get_All_Itineraries"
+)
 async def get_itineraries(
     skip: int = 0,
     limit: int = 100,
@@ -54,7 +54,11 @@ async def get_itineraries(
     )
 
 
-@router.get("/{itinerary_id}", response_model=ItineraryDetailed)
+@router.get(
+    "/{itinerary_id}",
+    response_model=ItineraryDetailed,
+    operation_id="Get_Itinerary_by_ID",
+)
 async def get_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
     """
     Retrieve detailed information for a specific itinerary by its ID.
@@ -76,7 +80,12 @@ async def get_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
     return itinerary
 
 
-@router.post("/", response_model=ItineraryDetailed, status_code=201)
+@router.post(
+    "/",
+    response_model=ItineraryDetailed,
+    status_code=201,
+    operation_id=("Create_Itinerary"),
+)
 async def create_itinerary(itinerary: ItineraryCreate, db: Session = Depends(get_db)):
     """
     Create a new itinerary with associated days, hotel stays, and activities.
