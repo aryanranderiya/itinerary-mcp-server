@@ -1,12 +1,14 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+# from app.mcp.server import mcp
 from app.database.connection import get_db
-from app.models.models import Itinerary, ItineraryDay, HotelStay, Activity
 from app.schemas.schemas import Itinerary as ItinerarySchema
 from app.schemas.schemas import ItineraryCreate, ItineraryDetailed
+from app.services.itinerary_service import ItineraryService
 
 router = APIRouter(
     prefix="/itineraries",
@@ -15,6 +17,7 @@ router = APIRouter(
 )
 
 
+# @mcp.tool()
 @router.get("/", response_model=List[ItinerarySchema])
 async def get_itineraries(
     skip: int = 0,
@@ -26,31 +29,47 @@ async def get_itineraries(
     db: Session = Depends(get_db),
 ):
     """
-    Get all itineraries with optional filtering
+    Retrieve a list of itineraries with optional filtering parameters.
+
+    Parameters:
+        skip (int): Number of records to skip for pagination (default: 0)
+        limit (int): Maximum number of records to return (default: 100)
+        region (str, optional): Filter itineraries by region
+        min_nights (int, optional): Filter itineraries with duration >= min_nights
+        max_nights (int, optional): Filter itineraries with duration <= max_nights
+        recommended (bool, optional): Filter by recommended status
+        db (Session): Database session dependency
+
+    Returns:
+        List[ItinerarySchema]: List of matching itineraries
     """
-    query = db.query(Itinerary)
-
-    # Apply filters if provided
-    if region:
-        query = query.filter(Itinerary.region == region)
-    if min_nights:
-        query = query.filter(Itinerary.duration_nights >= min_nights)
-    if max_nights:
-        query = query.filter(Itinerary.duration_nights <= max_nights)
-    if recommended is not None:
-        query = query.filter(Itinerary.is_recommended == (1 if recommended else 0))
-
-    itineraries = query.offset(skip).limit(limit).all()
-
-    return itineraries
+    return ItineraryService.get_itineraries(
+        db=db,
+        skip=skip,
+        limit=limit,
+        region=region,
+        min_nights=min_nights,
+        max_nights=max_nights,
+        recommended=recommended,
+    )
 
 
 @router.get("/{itinerary_id}", response_model=ItineraryDetailed)
 async def get_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
     """
-    Get a specific itinerary by ID with detailed information
+    Retrieve detailed information for a specific itinerary by its ID.
+
+    Parameters:
+        itinerary_id (int): The ID of the itinerary to retrieve
+        db (Session): Database session dependency
+
+    Returns:
+        ItineraryDetailed: Detailed representation of the itinerary including related data
+
+    Raises:
+        HTTPException: 404 if itinerary with specified ID does not exist
     """
-    itinerary = db.query(Itinerary).filter(Itinerary.id == itinerary_id).first()
+    itinerary = ItineraryService.get_itinerary_by_id(db, itinerary_id)
     if itinerary is None:
         raise HTTPException(status_code=404, detail="Itinerary not found")
 
@@ -60,54 +79,25 @@ async def get_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
 @router.post("/", response_model=ItineraryDetailed, status_code=201)
 async def create_itinerary(itinerary: ItineraryCreate, db: Session = Depends(get_db)):
     """
-    Create a new itinerary with days, hotel stays, and activities
+    Create a new itinerary with associated days, hotel stays, and activities.
+
+    Parameters:
+        itinerary (ItineraryCreate): The itinerary data to create
+        db (Session): Database session dependency
+
+    Returns:
+        ItineraryDetailed: Created itinerary with all related entities
+
+    Raises:
+        HTTPException:
+            - 400 for validation or input errors
+            - 500 for database errors during creation
     """
     try:
-        # Create the itinerary
-        db_itinerary = Itinerary(
-            name=itinerary.name,
-            description=itinerary.description,
-            region=itinerary.region,
-            duration_nights=itinerary.duration_nights,
-            is_recommended=itinerary.is_recommended,
-        )
-        db.add(db_itinerary)
-        db.commit()
-        db.refresh(db_itinerary)
-
-        # Add itinerary days
-        for day in itinerary.days:
-            db_day = ItineraryDay(
-                itinerary_id=db_itinerary.id,
-                day_number=day.day_number,
-                transfer_id=day.transfer_id,
-            )
-            db.add(db_day)
-            db.commit()
-            db.refresh(db_day)
-
-            # Add hotel stay
-            hotel_stay = HotelStay(itinerary_day_id=db_day.id, hotel_id=day.hotel_id)
-            db.add(hotel_stay)
-            db.commit()
-
-            # Add activities
-            if day.activity_ids:
-                for activity_id in day.activity_ids:
-                    activity = db.query(Activity).get(activity_id)
-                    if activity:
-                        db_day.activities.append(activity)
-
-                db.commit()
-
-        # Return the created itinerary with its relationships
-        return db_itinerary
-
+        return ItineraryService.create_itinerary(db, itinerary)
     except SQLAlchemyError as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
-        db.rollback()
         raise HTTPException(
             status_code=400, detail=f"Error creating itinerary: {str(e)}"
         )
