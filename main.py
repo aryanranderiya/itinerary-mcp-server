@@ -7,14 +7,14 @@ from contextlib import asynccontextmanager
 from fastapi_mcp import FastApiMCP
 
 # Initialize application
-api_app = FastAPI(
+app = FastAPI(
     title="Travel Itinerary API",
     description="API for managing travel itineraries",
 )
 
 
 # Configure CORS
-api_app.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -23,18 +23,18 @@ api_app.add_middleware(
 )
 
 # Include routers
-api_app.include_router(itinerary_router)
+app.include_router(itinerary_router)
 
 # Mount the MCP server directly to the FastAPI app
 # Doing this over here to ensure mcp server is created after including routes
-mcp_app = FastApiMCP(
-    api_app,
+mcp = FastApiMCP(
+    app,
     name="Travel Itinerary API MCP Server",
     description="MCP server for managing travel itineraries",
     describe_full_response_schema=True,  # Describe the full response JSON-schema
     describe_all_responses=True,  # All possible responses instead of just success (2XX) response
 )
-mcp_app.mount()
+mcp.mount()
 
 
 # Lifespan manager of FastAPI
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
     print("Shutting Down...")
 
 
-@api_app.get("/")
+@app.get("/")
 async def root():
     return {
         "message": "Welcome to the Travel Itinerary API",
